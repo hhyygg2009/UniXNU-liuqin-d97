@@ -100,8 +100,8 @@ env:
   PRELINK: ${{ inputs.prelink }}
   BOARD: liuqin
   CONFIG: liuqin_ipados18
-  STOCK_REPO: Document97/uefi-liuqin
-  STOCK_RELEASE: stock-V14.0.9.0.TMYCNXM
+  STOCK_REPO: hhyygg2009/UniXNU-liuqin-d97
+  STOCK_RELEASE: stock-V14.0.9.0.TMYCNXM  # fork: assets rebuilt by the agent from local stock dumps
   # Pinned: `release`, its steps and this repository's scripts/package.sh are one
   # interface. Move both together.
   UNIXNU_REF: c96b29975645b711dc06bc435c3ad27321ce817c
@@ -625,12 +625,18 @@ jobs:
           # The radio images and Xiaomi's board calibration come from fw/wlan/ of the stock
           # release the touch step verified; the Wi-Fi build embeds them in the kernel, which
           # leaves CI only encrypted.
-          python3 device/scripts/stage-liuqin-wifi-firmware.py "${RUNNER_TEMP}/touch-stock/fw/wlan" "${RUNNER_TEMP}/liuqin-wifi"
+          # liuqin-ci fork: this stock repack carries no fw/wlan (the Xiaomi CDN
+          # link expired), and the defconfig keeps Wi-Fi off, so skip staging.
+          if [ -d "${RUNNER_TEMP}/touch-stock/fw/wlan" ]; then
+            python3 device/scripts/stage-liuqin-wifi-firmware.py "${RUNNER_TEMP}/touch-stock/fw/wlan" "${RUNNER_TEMP}/liuqin-wifi"
+            printf 'PONG_WIFI_FIRMWARE=%s\n' "${RUNNER_TEMP}/liuqin-wifi/qca6490" >> "$GITHUB_ENV"
+          else
+            echo "::notice::no fw/wlan in the stock release: Wi-Fi firmware not staged (defconfig has Wi-Fi off)"
+          fi
           {
             printf 'PONG_SHENG_ROOT=%s\n' "$PONG_SHENG_ROOT"
             printf 'PONG_WIFI_SHARED=%s\n' "$PONG_WIFI_SHARED"
             printf 'PONG_WIFI_SOURCE=%s\n' "$PONG_WIFI_SOURCE"
-            printf 'PONG_WIFI_FIRMWARE=%s\n' "${RUNNER_TEMP}/liuqin-wifi/qca6490"
           } >> "$GITHUB_ENV"
       # The kernel is 913 translation units and a fresh runner starts with an
       # empty build tree, so before this a one-file patch cost the same ~29
