@@ -71,6 +71,4 @@ CONFIG_XNU_TRUST_CACHE_RUNTIME=n
 CONFIG_XNU_VERIFIED_ROOT_PROBE=n
 CONFIG_XNU_ZONE_PGZ_ALIGNMENT_PROBE=n
 
-# liuqin-ci fork: no QCA6490 firmware inputs available (stock repack lacks fw/wlan);
-# boot bring-up needs no Wi-Fi, so the native Wi-Fi stack stays out of this build.
-CONFIG_XNU_PONG_WIFI=n
+CONFIG_XNU_PONG_WIFI=y
