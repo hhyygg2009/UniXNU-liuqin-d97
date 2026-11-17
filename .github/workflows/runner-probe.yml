@@ -1,0 +1,22 @@
+name: runner-probe
+on:
+  workflow_dispatch:
+jobs:
+  probe:
+    strategy:
+      fail-fast: false
+      matrix:
+        label: [macos-15-intel, macos-15, macos-14, ubuntu-latest]
+    runs-on: ${{ matrix.label }}
+    timeout-minutes: 10
+    steps:
+      - name: whoami
+        run: |
+          echo "label=${{ matrix.label }}"
+          uname -a
+          (sw_vers -productVersion 2>/dev/null || lsb_release -ds)
+          echo "arch=$(uname -m)"
+          echo "cpu=$(sysctl -n machdep.cpu.brand_string 2>/dev/null || grep -m1 'model name' /proc/cpuinfo)"
+          df -h . | tail -1
+          ls /usr/local/opt 2>/dev/null | head -5
+          ls /opt/homebrew/opt 2>/dev/null | head -5
